@@ -25,6 +25,7 @@ Future<void> main() async {
   await flutterLocalNotificationsPlugin.initialize(
     const InitializationSettings(
       android: AndroidInitializationSettings("mipmap/ic_launcher"),
+      iOS: DarwinInitializationSettings(),
     ),
     onDidReceiveNotificationResponse: (notificationResponse) {},
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -36,6 +37,14 @@ Future<void> main() async {
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
       ?.requestPermission();
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
   runApp(const MyApp());
 }
 
