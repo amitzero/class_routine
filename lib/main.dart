@@ -128,23 +128,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ElevatedButton(
-            //   child: const Text('Click'),
-            //   onPressed: () async {
-            //     await flutterLocalNotificationsPlugin.show(
-            //       subjects[0].id,
-            //       subjects[0].title,
-            //       subjects[0].body,
-            //       const NotificationDetails(
-            //         android: AndroidNotificationDetails(
-            //           'subject routine',
-            //           'Subject Routine',
-            //           channelDescription: 'Subject Routine Notification',
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
             for (var sub in subjects) SubjectCard(subject: sub),
           ],
         ),
