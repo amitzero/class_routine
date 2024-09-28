@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
+import 'package:otp/otp.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -25,7 +26,6 @@ Future<void> main() async {
   await flutterLocalNotificationsPlugin.initialize(
     const InitializationSettings(
       android: AndroidInitializationSettings("mipmap/ic_launcher"),
-      iOS: DarwinInitializationSettings(),
     ),
     onDidReceiveNotificationResponse: (notificationResponse) {},
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -34,17 +34,8 @@ Future<void> main() async {
   final String timeZoneName = await FlutterTimezone.getLocalTimezone();
   tz.setLocalLocation(tz.getLocation(timeZoneName));
   flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.requestPermission();
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
   runApp(const MyApp());
 }
 
@@ -137,6 +128,10 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(OTP.generateTOTPCodeString(
+              "aaaaaaaaaaaaaaaaaaaa",
+              DateTime.now().millisecond,
+            )),
             for (var sub in subjects) SubjectCard(subject: sub),
           ],
         ),
@@ -176,7 +171,13 @@ class Subject {
 
   tz.TZDateTime get scheduleDateTime {
     var now = tz.TZDateTime.now(tz.local);
-    return tz.TZDateTime(tz.local, now.year, now.month, now.day + dayLeft, 22);
+    return tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day - 1 + (dayLeft == 0 ? 7 : dayLeft),
+      22,
+    );
   }
 
   String get title {
@@ -211,9 +212,8 @@ class _SubjectCardState extends State<SubjectCard> {
           channelDescription: 'Subject Routine Notification',
         ),
       ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
